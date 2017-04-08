@@ -15,9 +15,7 @@
                  [yogthos/config "0.8"]
                  [org.clojure/clojurescript "1.9.495"
                   :scope "provided"]
-                 [secretary "1.2.3"]
-                 [venantius/accountant "0.1.9"
-                  :exclusions [org.clojure/tools.reader]]]
+                 [thi.ng/geom "0.0.908"]]
 
   :plugins [[lein-environ "1.0.2"]
             [lein-cljsbuild "1.1.1"]

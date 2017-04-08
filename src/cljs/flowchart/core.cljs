@@ -1,5 +1,6 @@
 (ns flowchart.core
   (:require [reagent.core :as reagent :refer [atom]]
+            [thi.ng.geom.svg.core :as svg]
             [goog.string :as gstring]
             [goog.string.format]))
 
@@ -38,12 +39,13 @@
 
 (defn svg-component
   [& elems]
-  [:svg {:width "720"
-         :height "400"
-         :id "canvas"
-         :style {:outline "2px solid black"
-                 :background-color "#fff"}}
-   elems])
+  (svg/svg
+   {:width "720"
+    :height "400"
+    :id "canvas"
+    :style {:outline "2px solid black"
+            :background-color "#fff"}}
+   elems))
 
 (defn svg-page []
   [:div [:h2 "Some SVG"]
