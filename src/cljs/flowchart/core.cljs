@@ -28,24 +28,23 @@
           h 40
           w' (/ w 2)
           h' (/ h 2)
-          x (atom x)
-          y (atom y)
-          left-pressed? (atom false)
-          middle-pressed? (atom false)]
+          pos (atom [x y])
+          drag (atom false)]
       (fn []
-        [:g {:transform (gstring/format "translate(%d,%d)" (- @x w') (- @y h'))
+        [:g {:transform (apply gstring/format "translate(%d,%d)"
+                               (map + @pos
+                                    (if @drag
+                                      (get-in @mouse-state [:middle :delta])
+                                      [0 0])))
              :on-mouse-down #(case (.-button %)
-                               0 (do (reset! left-pressed? true) (swap! mouse-state assoc-in [:left :start-elem] :stmt))
-                               1 (reset! middle-pressed? true))
-             :on-mouse-move (fn [e]
-                              (when @middle-pressed?
-                                (reset! x (.-clientX e))
-                                (reset! y (.-clientY e))))
-             :on-mouse-up #(do (case (.-button %)
-                                 0 (do (reset! left-pressed? false) (swap! mouse-state assoc-in [:left :end-elem] :stmt))
-                                 1 (reset! middle-pressed? false)))}
+                               0 (swap! mouse-state assoc-in [:left :start-elem] :stmt)
+                               1 (reset! drag true))
+             :on-mouse-up #(when (= 1 (.-button %))
+                             (swap! pos map + (get-in @mouse-state [:middle :delta]))
+                             (reset! drag false)
+                             (js/alert "up"))}
          [:rect {:width w :height h :style {:fill "blue"}}]
-         [:text {:x 5 :y (* h .6)}text]]))))
+         [:text {:x 5 :y (* h .6)} (str text @drag)]]))))
 
 (defrecord Branch [x y text]
   Component
@@ -104,12 +103,10 @@
                            y (.-clientY e)]
                        (mouse-move! x y)))
     :on-mouse-up (fn [e]
-                   (.preventDefault e)
                    (button-up! (case (.-button e)
                                  0 :left
                                  1 :middle
-                                 2 :right))
-                   false)}
+                                 2 :right)))}
    body))
 
 (defn svg-page []
