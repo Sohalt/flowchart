@@ -1,5 +1,6 @@
 (ns flowchart.core
   (:require [reagent.core :as reagent :refer [atom]]
+            [cljs.pprint :refer [pprint]]
             [thi.ng.geom.svg.core :as svg]
             [goog.string :as gstring]
             [goog.string.format]))
@@ -8,6 +9,11 @@
 ;; State
 
 (defonce elems (atom []))
+
+(defonce mouse-state (atom {:left {:pressed? false :dragstart [0 0] :delta [0 0]}
+                            :middle {:pressed? false :dragstart [0 0] :delta [0 0]}
+                            :right {:pressed? false :dragstart [0 0] :delta [0 0]}}))
+
 
 ;; -------------------------
 ;; Views
@@ -35,9 +41,9 @@
                               (when @middle-pressed?
                                 (reset! x (.-clientX e))
                                 (reset! y (.-clientY e))))
-             :on-mouse-up #(case (.-button %)
-                             0 (reset! left-pressed? false)
-                             1 (reset! middle-pressed? false))}
+             :on-mouse-up #(do (case (.-button %)
+                                 0 (reset! left-pressed? false)
+                                 1 (reset! middle-pressed? false)))}
          [:rect {:width w :height h :style {:fill "blue" :stroke "black"}}]
          [:text {:x 5 :y (* h .6)}text]]))))
 
@@ -52,6 +58,28 @@
        [:polygon {:points ""}]
        [:text text]])))
 
+(defn arrow [from to]
+  (svg/line from to {:style {:stroke "black"}}))
+
+(defn- button-down! [button x y]
+  (swap! mouse-state update button merge {:pressed? true :dragstart [x y]}))
+
+(defn update-delta [x' y' s k]
+  (let [[x y] (get-in s [k :dragstart])]
+    (assoc-in s [k :delta] [(- x' x) (- y' y)])))
+
+
+(defn- update-drag [state x y]
+  (let [pressed-keys (keys (filter (fn [[button {:keys [pressed?]}]] pressed?)
+                                   state))]
+    (reduce (partial update-delta x y) state pressed-keys)))
+
+(defn- mouse-move! [x y]
+  (swap! mouse-state update-drag x y))
+
+(defn- button-up! [button]
+  (swap! mouse-state update button merge {:pressed? false :delta [0 0]}))
+
 (defn svg-component
   [& body]
   (svg/svg
@@ -62,16 +90,38 @@
             :background-color "#fff"
             :display "block"}
     :on-mouse-down (fn [e]
-                     (when (= 1 (.-buttons e))
-                       (swap! elems conj (->Stmt (.-clientX e) (.-clientY e) "foo"))))}
+                     (let [x (.-clientX e)
+                           y (.-clientY e)]
+                       (.preventDefault e)
+                       (button-down! (case (.-button e)
+                                       0 :left
+                                       1 :middle
+                                       2 :right) x y)
+                       false))
+    :on-mouse-move (fn [e]
+                     (let [x (.-clientX e)
+                           y (.-clientY e)]
+                       (mouse-move! x y)))
+    :on-mouse-up (fn [e]
+                   (.preventDefault e)
+                   (button-up! (case (.-button e)
+                                 0 :left
+                                 1 :middle
+                                 2 :right))
+                   false)}
    body))
 
-
-
 (defn svg-page []
-  [svg-component
-   (for [elem @elems]
-     [render elem])])
+  [:div
+   [svg-component
+    [:text {:x 50 :y 50} (with-out-str (pprint @mouse-state))]
+    (let [s @mouse-state
+          from (get-in s [:left :dragstart])
+          to (map + from (get-in s [:left :delta]))]
+      (when (get-in s [:left :pressed?])
+        [arrow from to]))
+    #_(for [elem @elems]
+        [render elem])]])
 
 ;; -------------------------
 ;; Initialize app
