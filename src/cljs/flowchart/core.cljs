@@ -26,25 +26,23 @@
   (render [_]
     (let [w 120
           h 40
-          w' (/ w 2)
-          h' (/ h 2)
           pos (atom [x y])
-          drag (atom false)]
+          drag? (atom false)]
       (fn []
         [:g {:transform (apply gstring/format "translate(%d,%d)"
                                (map + @pos
-                                    (if @drag
+                                    (if @drag?
                                       (get-in @mouse-state [:middle :delta])
                                       [0 0])))
              :on-mouse-down #(case (.-button %)
                                0 (swap! mouse-state assoc-in [:left :start-elem] :stmt)
-                               1 (reset! drag true))
+                               1 (reset! drag? true))
              :on-mouse-up #(when (= 1 (.-button %))
-                             (swap! pos map + (get-in @mouse-state [:middle :delta]))
-                             (reset! drag false)
-                             (js/alert "up"))}
+                             (swap! pos (partial map + (get-in @mouse-state [:middle :delta])))
+                             (reset! drag? false))
+             :key (gensym)}
          [:rect {:width w :height h :style {:fill "blue"}}]
-         [:text {:x 5 :y (* h .6)} (str text @drag)]]))))
+         [:text {:x 5 :y (* h .6)} (str text @drag?)]]))))
 
 (defrecord Branch [x y text]
   Component
