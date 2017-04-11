@@ -18,6 +18,9 @@
 ;; -------------------------
 ;; Views
 
+(defn arrow [from to]
+  [:g {:key (gensym)} (svg/line-decorated from to nil (svg/arrow-head 10 (/ Math/PI 4) true))])
+
 (defprotocol Component
   (render [_]))
 
@@ -26,23 +29,35 @@
   (render [_]
     (let [w 120
           h 40
+          outlinks (atom [])
           pos (atom [x y])
           drag? (atom false)]
       (fn []
-        [:g {:transform (apply gstring/format "translate(%d,%d)"
-                               (map + @pos
-                                    (if @drag?
-                                      (get-in @mouse-state [:middle :delta])
-                                      [0 0])))
-             :on-mouse-down #(case (.-button %)
-                               0 (swap! mouse-state assoc-in [:left :start-elem] :stmt)
-                               1 (reset! drag? true))
-             :on-mouse-up #(when (= 1 (.-button %))
-                             (swap! pos (partial map + (get-in @mouse-state [:middle :delta])))
-                             (reset! drag? false))
-             :key (gensym)}
-         [:rect {:width w :height h :style {:fill "blue"}}]
-         [:text {:x 5 :y (* h .6)} (str text @drag?)]]))))
+        (vec
+         (concat
+          [:g
+           [:g {:transform (apply gstring/format "translate(%d,%d)"
+                                  (map + @pos
+                                       (if @drag?
+                                         (get-in @mouse-state [:middle :delta])
+                                         [0 0])))
+                :on-mouse-down #(case (.-button %)
+                                  0 (swap! mouse-state assoc-in [:left :start-elem] [:stmt outlinks])
+                                  1 (reset! drag? true))
+                :on-mouse-up #(case (.-button %)
+                                0 (let [s @mouse-state
+                                        left-pressed? (get-in s [:left :pressed?])
+                                        [label links] (get-in s [:left :start-elem])]
+                                    (when (and left-pressed? (= label :stmt))
+                                      (swap! links conj pos)))
+                                1 (do
+                                    (swap! pos (partial map + (get-in @mouse-state [:middle :delta])))
+                                    (reset! drag? false)))
+                :key (gensym)}
+            [:rect {:width w :height h :style {:fill "blue"}}]
+            [:text {:x 5 :y (* h .6)} text]]]
+          (mapv (fn [dest] (arrow @pos @dest))
+                @outlinks)))))))
 
 (defrecord Branch [x y text]
   Component
@@ -54,9 +69,6 @@
                :transform "rotate(45)"}]
        [:polygon {:points ""}]
        [:text text]])))
-
-(defn arrow [from to]
-  [:g (svg/line-decorated from to nil (svg/arrow-head 10 (/ Math/PI 4) true))])
 
 (defn- button-down! [button x y]
   (swap! mouse-state update button merge {:pressed? true :dragstart [x y]}))
@@ -111,13 +123,13 @@
   [:div
    [svg-component
     [:text {:x 50 :y 50} (with-out-str (pprint @mouse-state))]
-    (for [elem @elems]
-        [render elem])
     (let [s @mouse-state
           from (get-in s [:left :dragstart])
           to (map + from (get-in s [:left :delta]))]
-      (when (and (get-in s [:left :pressed?]) (= (get-in s [:left :start-elem]) :stmt))
-        [arrow from to]))]])
+      (when (and (get-in s [:left :pressed?]) (= (get-in s [:left :start-elem 0]) :stmt))
+        [arrow from to]))
+    (for [elem @elems]
+        [render elem])]])
 
 ;; -------------------------
 ;; Initialize app
