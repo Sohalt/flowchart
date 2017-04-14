@@ -17,6 +17,8 @@
 
 (defonce drag (atom nil))
 
+(defonce elem-type (atom :stmt))
+
 ;; -------------------------
 ;; Views
 
@@ -46,18 +48,12 @@
 (defn link! [from to]
   (swap! elems update-in [from :outlinks] conj to))
 
-(defn elem [type]
-  (fn [x y text]
+(defn elem [type x y text]
     {:id (keyword (gensym "id"))
      :type type
      :text text
      :pos [x y]
-     :outlinks []}))
-
-(def start (elem :start))
-(def stmt (elem :stmt))
-(def branch (elem :branch))
-(def note (elem :note))
+     :outlinks []})
 
 (defn add-elem! [{:keys [id] :as elem}]
   (swap! elems assoc id elem))
@@ -155,7 +151,7 @@
             :display "block"
             :stroke "black"}
     :on-click (fn [e] (when (= 0 (.-button e))
-                        (add-elem! (stmt (.-clientX e) (.-clientY e) "foo"))))
+                        (add-elem! (elem @elem-type (.-clientX e) (.-clientY e) "foo"))))
     :on-mouse-down (fn [e]
                      (let [x (.-clientX e)
                            y (.-clientY e)]
@@ -175,6 +171,17 @@
                                  1 :middle
                                  2 :right)))}
    body))
+
+(defn handle-key-press! [key-code]
+  (when-let [new-elem-type (case key-code
+                             66 :branch ;(b)ranch
+                             83 :stmt ;(s)tatement
+                             78 :note ;(n)ote
+                             84 :start ;(t)erminal
+                             nil)]
+    (reset! elem-type new-elem-type)))
+
+(defonce foo (set! (.-onkeydown js/window) (fn [e] (handle-key-press! (.-keyCode e)))))
 
 (defn svg-page []
   [:div
