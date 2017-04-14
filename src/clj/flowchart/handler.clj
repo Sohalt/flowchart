@@ -22,7 +22,8 @@
 (defn loading-page []
   (html5
     (head)
-    [:body {:class "body-container"}
+    [:body {:class "body-container"
+            :oncontextmenu "return false;"}
      mount-target
      (include-js "/js/app.js")]))
 
