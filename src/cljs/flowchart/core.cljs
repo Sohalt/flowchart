@@ -43,6 +43,13 @@
      :text text
      :pos [x y]}))
 
+(defn branch [x y text]
+  (let [id (gensym)]
+    {:id id
+     :type :branch
+     :text text
+     :pos [x y]}))
+
 (defn add-elem! [{:keys [id] :as elem}]
   (swap! elems assoc id elem))
 
@@ -67,16 +74,15 @@
      [:rect {:width w :height h :style {:fill "blue"}}]
      [:text {:x 5 :y (* h .6)} text])))
 
-#_(defrecord Branch [x y text]
-  Component
-  (render [_]
-    (let [l 80]
-      [:g {:transform (gstring/format "translate(%d,%d)" x y)}
-       [:rect {:width l :height l
-               :style {:fill "none" :stroke "blue"}
-               :transform "rotate(45)"}]
-       [:polygon {:points ""}]
-       [:text text]])))
+(defmethod render :branch [{:keys [id text]}]
+  (let [w 140
+        h 60
+        w' (/ w 2)
+        h' (/ h 2)]
+    (draggable-component
+     id
+     (svg/polygon [[0 h'] [w' 0] [w h'] [w' h]] {:style {:fill "orange"}})
+     (svg/text [40 (* h .6)] text))))
 
 (defn- button-down! [button x y]
   (swap! mouse-state update button merge {:pressed? true :dragstart [x y]}))
