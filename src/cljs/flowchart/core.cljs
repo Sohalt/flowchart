@@ -10,7 +10,8 @@
 
 (defonce elems (atom {}))
 
-(defonce mouse-state (atom {:left {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}
+(defonce mouse-state (atom {:position [0 0]
+                            :left {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}
                             :middle {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}
                             :right {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}}))
 
@@ -135,7 +136,10 @@
     (reduce (partial update-delta x y) state pressed-keys)))
 
 (defn- mouse-move! [x y]
-  (swap! mouse-state update-drag x y))
+  (swap! mouse-state (fn [state]
+                       (-> state
+                           (update-drag x y)
+                           (assoc :position [x y])))))
 
 (defn- button-up! [button]
   (do (swap! mouse-state update button merge {:pressed? false :delta [0 0] :start-elem nil})
