@@ -85,7 +85,7 @@
         h 20]
     (draggable-component
      id
-     [:ellipse {:rx w :ry h :style {:fill "blue"}}]
+     [:ellipse {:cx (/ w 2) :cy (/ h 2) :rx w :ry h :style {:fill "blue"}}]
      (svg/text [5 (* h .6)] text))))
 
 (defmethod render :stmt [{:keys [id text]}]
