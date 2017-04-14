@@ -28,6 +28,9 @@
 (defn dragged! [id]
   (reset! drag id))
 
+(defn right-pressed? []
+  (reagent/track #(get-in @mouse-state [:right :pressed?])))
+
 (defn internal-pos [id]
   (reagent/track #(get-in @elems [id :pos])))
 
@@ -60,6 +63,9 @@
 (defn add-elem! [{:keys [id] :as elem}]
   (swap! elems assoc id elem))
 
+(defn remove-elem! [id]
+  (swap! elems dissoc id))
+
 (defmulti render (fn [elem] (:type elem)))
 
 (defn draggable-component [id & body]
@@ -70,7 +76,8 @@
          :on-mouse-down #(case (.-button %)
                            1 (dragged! id))
          :on-mouse-up #(case (.-button %)
-                         1 (swap! elems assoc-in [id :pos] @(actual-pos id)))}]
+                         1 (swap! elems assoc-in [id :pos] @(actual-pos id)))
+         :on-mouse-over #(if @(right-pressed?) (remove-elem! id))}]
     body)))
 
 (defmethod render :start [{:keys [id text]}]
