@@ -184,16 +184,16 @@
 (defonce foo (set! (.-onkeydown js/window) (fn [e] (handle-key-press! (.-keyCode e)))))
 
 (defn svg-page []
-  [:div
-   [svg-component
-    [:text {:x 50 :y 50} (with-out-str (pprint @mouse-state))]
-    #_(let [s @mouse-state
-          from (get-in s [:left :dragstart])
-          to (map + from (get-in s [:left :delta]))]
-      (when (and (get-in s [:left :pressed?]) (= (get-in s [:left :start-elem 0]) :stmt))
-        [arrow from to]))
-    (for [elem (vals @elems)]
-      [render elem])]])
+  [svg-component
+   [:text {:x 50 :y 50} (with-out-str (pprint @mouse-state))]
+   (svg/text (get @mouse-state :position) (name @elem-type))
+   #_(let [s @mouse-state
+           from (get-in s [:left :dragstart])
+           to (map + from (get-in s [:left :delta]))]
+       (when (and (get-in s [:left :pressed?]) (= (get-in s [:left :start-elem 0]) :stmt))
+         [arrow from to]))
+   (for [elem (vals @elems)]
+     [render elem])])
 
 ;; -------------------------
 ;; Initialize app
