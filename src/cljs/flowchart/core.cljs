@@ -45,17 +45,24 @@
 
 (defmulti render (fn [elem] (:type elem)))
 
-(defmethod render :stmt [{:keys [id text]}]
-  (let [w 120
-        h 40]
+(defn draggable-component [id & body]
+  (vec
+   (concat
     [:g {:transform (apply gstring/format "translate(%d,%d)"
                            @(actual-pos id))
          :on-mouse-down #(case (.-button %)
                            1 (dragged! id))
          :on-mouse-up #(case (.-button %)
-                         1 (swap! elems assoc-in [id :pos] @(actual-pos id)))}
+                         1 (swap! elems assoc-in [id :pos] @(actual-pos id)))}]
+    body)))
+
+(defmethod render :stmt [{:keys [id text]}]
+  (let [w 120
+        h 40]
+    (draggable-component
+     id
      [:rect {:width w :height h :style {:fill "blue"}}]
-     [:text {:x 5 :y (* h .6)} text]]))
+     [:text {:x 5 :y (* h .6)} text])))
 
 #_(defrecord Branch [x y text]
   Component
