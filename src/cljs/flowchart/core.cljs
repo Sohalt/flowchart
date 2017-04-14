@@ -43,6 +43,9 @@
      :text text
      :pos [x y]}))
 
+(defn add-elem! [{:keys [id] :as elem}]
+  (swap! elems assoc id elem))
+
 (defmulti render (fn [elem] (:type elem)))
 
 (defn draggable-component [id & body]
@@ -104,8 +107,7 @@
             :display "block"
             :stroke "black"}
     :on-click (fn [e] (when (= 0 (.-button e))
-                        (let [{:keys [id] :as elem} (stmt (.-clientX e) (.-clientY e) "foo")]
-                          (swap! elems assoc id elem))))
+                        (add-elem! (stmt (.-clientX e) (.-clientY e) "foo"))))
     :on-mouse-down (fn [e]
                      (let [x (.-clientX e)
                            y (.-clientY e)]
