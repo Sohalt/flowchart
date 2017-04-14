@@ -39,26 +39,16 @@
                                               (get-in @mouse-state [:middle :delta])
                                               [0 0]))))
 
-(defn start [x y text]
-  (let [id (gensym)]
-    {:id id
-     :type :start
+(defn elem [type]
+  (fn [x y text]
+    {:id (keyword (gensym "id"))
+     :type type
      :text text
      :pos [x y]}))
 
-(defn stmt [x y text]
-  (let [id (gensym)]
-    {:id id
-     :type :stmt
-     :text text
-     :pos [x y]}))
-
-(defn branch [x y text]
-  (let [id (gensym)]
-    {:id id
-     :type :branch
-     :text text
-     :pos [x y]}))
+(def start (elem :start))
+(def stmt (elem :stmt))
+(def branch (elem :branch))
 
 (defn add-elem! [{:keys [id] :as elem}]
   (swap! elems assoc id elem))
