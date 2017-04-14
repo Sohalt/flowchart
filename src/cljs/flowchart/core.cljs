@@ -49,6 +49,7 @@
 (def start (elem :start))
 (def stmt (elem :stmt))
 (def branch (elem :branch))
+(def note (elem :note))
 
 (defn add-elem! [{:keys [id] :as elem}]
   (swap! elems assoc id elem))
@@ -95,6 +96,18 @@
      id
      (svg/polygon [[0 h'] [w' 0] [w h'] [w' h]] {:style {:fill "orange"}})
      (svg/text [40 (* h .6)] text))))
+
+(defmethod render :note [{:keys [id text]}]
+  (let [corner 20
+        w 140
+        h 200]
+    (draggable-component
+     id
+     (svg/polygon [[corner 0] [w 0] [w h] [0 h] [0 corner]]
+                  {:style {:fill "beige"}})
+     (svg/polygon [[corner 0] [corner corner] [0 corner]]
+                  {:style {:fill "burlywood"}})
+     (svg/text [(* 1.2 corner) (* 1.2 corner)] text))))
 
 (defn- button-down! [button x y]
   (swap! mouse-state update button merge {:pressed? true :dragstart [x y]}))
