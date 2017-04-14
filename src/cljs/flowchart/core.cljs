@@ -10,9 +10,9 @@
 
 (defonce elems (atom {}))
 
-(defonce mouse-state (atom {:left {:pressed? false :dragstart [0 0] :delta [0 0]}
-                            :middle {:pressed? false :dragstart [0 0] :delta [0 0]}
-                            :right {:pressed? false :dragstart [0 0] :delta [0 0]}}))
+(defonce mouse-state (atom {:left {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}
+                            :middle {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}
+                            :right {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}}))
 
 (defonce drag (atom nil))
 
