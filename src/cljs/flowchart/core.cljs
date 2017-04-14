@@ -71,8 +71,8 @@
         h 40]
     (draggable-component
      id
-     [:rect {:width w :height h :style {:fill "blue"}}]
-     [:text {:x 5 :y (* h .6)} text])))
+     (svg/rect [0 0] w h {:style {:fill "blue"}})
+     (svg/text [5 (* h .6)] text))))
 
 (defmethod render :branch [{:keys [id text]}]
   (let [w 140
