@@ -81,13 +81,28 @@
            body))]
         (mapv (fn [dest] (arrow @(actual-pos id) @(actual-pos dest))) @(outlinks id)))))
 
+(defn edit-text [[x y] text]
+  (let [t (atom text)]
+    (fn []
+      [:g
+       [svg/text [x y]
+                 @t
+                 {:on-click (fn [e]
+                              (when (= 0 (.-button e))
+                                (.preventDefault e)
+                                (.stopPropagation e)
+                                (when-let [new-text (.prompt js/window "enter new label")]
+                                  (when-not (= new-text "")
+                                    (reset! t new-text))))
+                              true)}]])))
+
 (defmethod render :start [{:keys [id text]}]
   (let [w 60
         h 20]
     (draggable-component
      id
      [:ellipse {:cx (/ w 2) :cy (/ h 2) :rx w :ry h :style {:fill "plum"}}]
-     (svg/text [5 (* h .6)] text))))
+     [edit-text [5 (* h .6)] text])))
 
 (defmethod render :stmt [{:keys [id text]}]
   (let [w 120
@@ -95,7 +110,7 @@
     (draggable-component
      id
      (svg/rect [0 0] w h {:style {:fill "blue"}})
-     (svg/text [5 (* h .6)] text))))
+     [edit-text [5 (* h .6)] text])))
 
 (defmethod render :branch [{:keys [id text]}]
   (let [w 140
@@ -105,7 +120,7 @@
     (draggable-component
      id
      (svg/polygon [[0 h'] [w' 0] [w h'] [w' h]] {:style {:fill "orange"}})
-     (svg/text [40 (* h .6)] text))))
+     [edit-text [40 (* h .6)] text])))
 
 (defmethod render :note [{:keys [id text]}]
   (let [corner 20
@@ -117,7 +132,7 @@
                   {:style {:fill "beige"}})
      (svg/polygon [[corner 0] [corner corner] [0 corner]]
                   {:style {:fill "burlywood"}})
-     (svg/text [(* 1.2 corner) (* 1.2 corner)] text))))
+     [edit-text [(* 1.2 corner) (* 1.2 corner)] text])))
 
 (defn- button-down! [button x y]
   (swap! mouse-state update button merge {:pressed? true :dragstart [x y]}))
