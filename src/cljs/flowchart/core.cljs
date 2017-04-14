@@ -150,8 +150,9 @@
     :style {:background-color "#fff"
             :display "block"
             :stroke "black"}
-    :on-click (fn [e] (when (= 0 (.-button e))
-                        (add-elem! (elem @elem-type (.-clientX e) (.-clientY e) "foo"))))
+    :on-click (fn [e] (do (.preventDefault e)
+                          (when (= 0 (.-button e))
+                            (add-elem! (elem @elem-type (.-clientX e) (.-clientY e) "foo")))))
     :on-mouse-down (fn [e]
                      (let [x (.-clientX e)
                            y (.-clientY e)]
