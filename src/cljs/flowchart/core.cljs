@@ -36,6 +36,13 @@
                                               (get-in @mouse-state [:middle :delta])
                                               [0 0]))))
 
+(defn start [x y text]
+  (let [id (gensym)]
+    {:id id
+     :type :start
+     :text text
+     :pos [x y]}))
+
 (defn stmt [x y text]
   (let [id (gensym)]
     {:id id
@@ -65,6 +72,14 @@
          :on-mouse-up #(case (.-button %)
                          1 (swap! elems assoc-in [id :pos] @(actual-pos id)))}]
     body)))
+
+(defmethod render :start [{:keys [id text]}]
+  (let [w 60
+        h 20]
+    (draggable-component
+     id
+     [:ellipse {:rx w :ry h :style {:fill "blue"}}]
+     (svg/text [5 (* h .6)] text))))
 
 (defmethod render :stmt [{:keys [id text]}]
   (let [w 120
