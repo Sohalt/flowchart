@@ -39,12 +39,19 @@
                                               (get-in @mouse-state [:middle :delta])
                                               [0 0]))))
 
+(defn outlinks [id]
+  (reagent/track #(get-in @elems [id :outlinks])))
+
+(defn link! [from to]
+  (swap! elems update-in [from :outlinks] conj to))
+
 (defn elem [type]
   (fn [x y text]
     {:id (keyword (gensym "id"))
      :type type
      :text text
-     :pos [x y]}))
+     :pos [x y]
+     :outlinks []}))
 
 (def start (elem :start))
 (def stmt (elem :stmt))
@@ -60,16 +67,22 @@
 (defmulti render (fn [elem] (:type elem)))
 
 (defn draggable-component [id & body]
-  (vec
-   (concat
-    [:g {:transform (apply gstring/format "translate(%d,%d)"
-                           @(actual-pos id))
-         :on-mouse-down #(case (.-button %)
-                           1 (dragged! id))
-         :on-mouse-up #(case (.-button %)
-                         1 (swap! elems assoc-in [id :pos] @(actual-pos id)))
-         :on-mouse-over #(if @(right-pressed?) (remove-elem! id))}]
-    body)))
+  (vec (concat
+        [:g
+         (vec
+          (concat
+           [:g {:transform (apply gstring/format "translate(%d,%d)"
+                                  @(actual-pos id))
+                :on-mouse-down #(case (.-button %)
+                                  0 (swap! mouse-state update :left merge {:start-elem id})
+                                  1 (dragged! id))
+                :on-mouse-up #(case (.-button %)
+                                0 (when-let [from (get-in @mouse-state [:left :start-elem])]
+                                    (link! from id))
+                                1 (swap! elems assoc-in [id :pos] @(actual-pos id)))
+                :on-mouse-over #(if @(right-pressed?) (remove-elem! id))}]
+           body))]
+        (mapv (fn [dest] (arrow @(actual-pos id) @(actual-pos dest))) @(outlinks id)))))
 
 (defmethod render :start [{:keys [id text]}]
   (let [w 60
