@@ -197,8 +197,6 @@
                              nil)]
     (reset! elem-type new-elem-type)))
 
-(defonce foo (set! (.-onkeydown js/window) (fn [e] (handle-key-press! (.-keyCode e)))))
-
 (defn svg-page []
   [svg-component
    [:text {:x 50 :y 50} (with-out-str (pprint @mouse-state))]
@@ -217,4 +215,5 @@
   (reagent/render [#'svg-page] (.getElementById js/document "app")))
 
 (defn init! []
+  (set! (.-onkeydown js/window) (fn [e] (handle-key-press! (.-keyCode e))))
   (mount-root))
