@@ -61,8 +61,15 @@
 (defn add-elem! [{:keys [id] :as elem}]
   (swap! elems assoc id elem))
 
+(defn map-vals [m f]
+  (->> m (map (fn [[k v]] [k (f v)])) (into {})))
+
 (defn remove-elem! [id]
-  (swap! elems dissoc id))
+  (swap! elems
+         (fn [elems]
+           (-> elems
+               (dissoc id)
+               (map-vals #(update % :outlinks (partial remove #{id})))))))
 
 (defmulti render (fn [elem] (:type elem)))
 
