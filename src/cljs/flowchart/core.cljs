@@ -32,18 +32,21 @@
   (reset! drag id))
 
 (defn right-pressed? []
-  (reagent/track #(get-in @mouse-state [:right :pressed?])))
+  (reagent/cursor mouse-state [:right :pressed?]))
 
 (defn internal-pos [id]
-  (reagent/track #(get-in @elems [id :pos])))
+  (reagent/cursor elems [id :pos]))
 
 (defn actual-pos [id]
-  (reagent/track #(map + @(internal-pos id) (if @(dragged? id)
-                                              (get-in @mouse-state [:middle :delta])
-                                              [0 0]))))
+  (let [internal-pos (internal-pos id)
+        dragged? (dragged? id)
+        delta (reagent/cursor mouse-state [:middle :delta])]
+    (reagent/track #(map + @internal-pos (if @dragged?
+                                           @delta
+                                           [0 0])))))
 
 (defn outlinks [id]
-  (reagent/track #(get-in @elems [id :outlinks])))
+  (reagent/cursor elems [id :outlinks]))
 
 (defn link! [from to]
   (swap! elems update-in [from :outlinks] conj to))
