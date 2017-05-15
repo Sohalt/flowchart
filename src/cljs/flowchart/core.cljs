@@ -199,8 +199,8 @@
 
 (defn svg-page []
   [svg-component
-   [:text {:x 50 :y 50} (with-out-str (pprint @mouse-state))]
    (svg/text (get @mouse-state :position) (name @elem-type))
+   [svg/text [50 50] (with-out-str (pprint @mouse-state))]
    (when-let [start (get-in @mouse-state [:left :start-elem])]
      (let [from @(actual-pos start)
            to (get @mouse-state :position)]
