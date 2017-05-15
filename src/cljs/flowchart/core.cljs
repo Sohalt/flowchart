@@ -84,25 +84,23 @@
 (defn edit-text [[x y] text]
   (let [t (atom text)]
     (fn []
-      [:g
-       [svg/text [x y]
-                 @t
-                 {:on-click (fn [e]
-                              (when (= 0 (.-button e))
-                                (.preventDefault e)
-                                (.stopPropagation e)
-                                (when-let [new-text (.prompt js/window "enter new label")]
-                                  (when-not (= new-text "")
-                                    (reset! t new-text))))
-                              true)}]])))
+      [:g {:transform (gstring/format "translate(%d,%d)" x y)}
+       [:foreignObject {:width "100" :height "20"}
+        [:textarea {:style {:width "100%"
+                            :height "100%"}
+                    :value @t
+                    :on-click #(.stopPropagation %)
+                    :on-change (fn [e]
+                                 (.preventDefault e)
+                                 (reset! t (.-value (.-target e))))}]]])))
 
 (defmethod render :start [{:keys [id text]}]
   (let [w 60
         h 20]
     (draggable-component
      id
-     [:ellipse {:cx (/ w 2) :cy (/ h 2) :rx w :ry h :style {:fill "plum"}}]
-     [edit-text [5 (* h .6)] text])))
+     [:ellipse {:cx w :cy h :rx w :ry h :style {:fill "plum"}}]
+     [edit-text [10 10] text])))
 
 (defmethod render :stmt [{:keys [id text]}]
   (let [w 120
@@ -110,7 +108,7 @@
     (draggable-component
      id
      (svg/rect [0 0] w h {:style {:fill "blue"}})
-     [edit-text [5 (* h .6)] text])))
+     [edit-text [5 5] text])))
 
 (defmethod render :branch [{:keys [id text]}]
   (let [w 140
@@ -120,7 +118,7 @@
     (draggable-component
      id
      (svg/polygon [[0 h'] [w' 0] [w h'] [w' h]] {:style {:fill "orange"}})
-     [edit-text [40 (* h .6)] text])))
+     [edit-text [40 40] text])))
 
 (defmethod render :note [{:keys [id text]}]
   (let [corner 20
@@ -171,11 +169,13 @@
     :on-mouse-down (fn [e]
                      (let [x (.-clientX e)
                            y (.-clientY e)]
-                       (.preventDefault e)
-                       (button-down! (case (.-button e)
-                                       0 :left
-                                       1 :middle
-                                       2 :right) x y)
+                       (when-not (and (= "TEXTAREA" (.-tagName (.-target e)))
+                                      (= 0 (.-button e)))
+                         (.preventDefault e)
+                         (button-down! (case (.-button e)
+                                         0 :left
+                                         1 :middle
+                                         2 :right) x y))
                        false))
     :on-mouse-move (fn [e]
                      (let [x (.-clientX e)
