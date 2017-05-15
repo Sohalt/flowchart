@@ -82,17 +82,26 @@
         (mapv (fn [dest] (arrow @(actual-pos id) @(actual-pos dest))) @(outlinks id)))))
 
 (defn edit-text [[x y] text]
-  (let [t (atom text)]
+  (let [t (atom text)
+        editing? (atom false)]
     (fn []
       [:g {:transform (gstring/format "translate(%d,%d)" x y)}
-       [:foreignObject {:width "100" :height "20"}
-        [:textarea {:style {:width "100%"
-                            :height "100%"}
-                    :value @t
-                    :on-click #(.stopPropagation %)
-                    :on-change (fn [e]
-                                 (.preventDefault e)
-                                 (reset! t (.-value (.-target e))))}]]])))
+       (if @editing?
+         [:foreignObject {:width "100" :height "20"}
+          [:textarea {:style {:width "100%"
+                              :height "100%"}
+                      :auto-focus true
+                      :value @t
+                      :on-key-down (fn [e]
+                                     (when (= 27 (.-keyCode e)) ; ESC
+                                       (.blur (.-target e))))
+                      :on-change (fn [e]
+                                   (.preventDefault e)
+                                   (reset! t (.-value (.-target e))))
+                      :on-blur #(reset! editing? false)}]]
+         [svg/text [10 20] @t {:on-click #(do (.stopPropagation %)
+                                              (reset! editing? true))}])])))
+
 
 (defmethod render :start [{:keys [id text]}]
   (let [w 60
