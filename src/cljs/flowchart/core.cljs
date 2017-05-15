@@ -23,7 +23,7 @@
 ;; Views
 
 (defn arrow [from to]
-  [:g {:key (gensym)} (svg/line-decorated from to nil (svg/arrow-head 10 (/ Math/PI 4) true))])
+  [:g (svg/line-decorated from to nil (svg/arrow-head 10 (/ Math/PI 4) true))])
 
 (defn dragged? [id]
   (reagent/track #(= @drag id)))
