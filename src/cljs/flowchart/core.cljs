@@ -49,11 +49,11 @@
   (swap! elems update-in [from :outlinks] conj to))
 
 (defn elem [type x y text]
-    {:id (keyword (gensym "id"))
-     :type type
-     :text text
-     :pos [x y]
-     :outlinks []})
+  {:id (keyword (gensym "id"))
+   :type type
+   :text text
+   :pos [x y]
+   :outlinks []})
 
 (defn add-elem! [{:keys [id] :as elem}]
   (swap! elems assoc id elem))
