@@ -1,0 +1,7 @@
+Abstract
+
+Building a Flowchart Editor with Clojurescript, Reagent and SVG
+
+The web has come a long way since its early days and it is now possible to build fully fledged applications using modern web technologies.
+However for certain UIs HTML and CSS don't provide the best fit, and the origins of HTML as a document markup language shine trough. This is where SVG can shine and enable a more flexible UI design, all while still leveraging a lot of the powerful tooling that has been developed for websites over the recent years, such as React or a Clojurescript wrapper like Reagent.
+I will present a flowchart editor #####TODO####### caveats, pitfalls, thoughts behind UI design decisions 
