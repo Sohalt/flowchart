@@ -21,7 +21,7 @@
      [common/draggable-component
       id
       (svg/rect [0 0] w h {:style {:fill "blue"}})
-      [common/edit-text [5 5] text]]
+      [common/edit-text [0 0] text]]
      [common/outlinks id]]))
 
 (defmethod render :branch [{:keys [id text]}]

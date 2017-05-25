@@ -69,7 +69,7 @@
 (defn elem [type x y]
   {:id (keyword (gensym "id"))
    :type type
-   :text ""
+   :text "foobar"
    :pos [x y]
    :outlinks []})
 

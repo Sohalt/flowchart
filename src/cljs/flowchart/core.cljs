@@ -29,9 +29,11 @@
     :style {:background-color "#fff"
             :display "block"
             :stroke "black"}
-    :on-click (fn [e] (do (.preventDefault e)
-                          (when (= 0 (.-button e))
-                            (state/add-elem! (.-clientX e) (.-clientY e)))))
+    :on-click (-> (fn [e] (do (.preventDefault e)
+                              (when (= 0 (.-button e))
+                                (state/add-elem! (.-clientX e) (.-clientY e)))))
+                  (wrap-exact-event-target)
+                  (wrap-stop-propagation))
     :on-mouse-down (fn [e]
                      (let [x (.-clientX e)
                            y (.-clientY e)]

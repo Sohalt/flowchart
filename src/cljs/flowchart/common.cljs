@@ -2,7 +2,14 @@
   (:require [flowchart.state :as state]
             [thi.ng.geom.svg.core :as svg]
             [reagent.core :as reagent :refer [atom]]
-            [goog.string :as gstring]))
+            [goog.string :as gstring]
+            [clojure.string :as str]))
+
+(defn multiline-text [[x y] text & [attrs]]
+  (into [:text (svg/svg-attribs attrs {:x x :y y})]
+        (map-indexed (fn [i line]
+                       [:tspan {:x x :dy "1.2em" #_(str (+ y (* i 1.2)) "em")} line])
+                     (str/split-lines text))))
 
 (defn arrow [from to]
   [:g (svg/line-decorated from to nil (svg/arrow-head 10 (/ Math/PI 4) true))])
@@ -44,5 +51,5 @@
                                    (.preventDefault e)
                                    (reset! t (.-value (.-target e))))
                       :on-blur #(reset! editing? false)}]]
-         [svg/text [10 20] @t {:on-click #(do (.stopPropagation %)
+         [multiline-text [10 20] @t {:on-click #(do (.stopPropagation %)
                                               (reset! editing? true))}])])))
