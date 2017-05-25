@@ -7,10 +7,11 @@ However for certain UIs HTML and CSS don't provide the best fit, and the origins
 I will present a flowchart editor built with Clojurescript, Reagent and SVG to hint at what's possible with these technologies and show some caveats and pitfalls to avoid during development.
 
 
-caveats:
+stuff:
 
 some attributes and events don't work with SVG (or are not implemented yet):
 e.g. focusable, onchange, onblur
 text layout can be a little cumbersome
 foreignObject
 reagent variable scope when using (fn […] (let […] (fn […] …))) form
+figwheel + cider (spacemacs)
