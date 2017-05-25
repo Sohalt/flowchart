@@ -1,177 +1,24 @@
 (ns flowchart.core
-  (:require [reagent.core :as reagent :refer [atom]]
+  (:require [flowchart.state :as state]
+            [flowchart.view :as view]
+            [reagent.core :as reagent :refer [atom]]
             [cljs.pprint :refer [pprint]]
             [thi.ng.geom.svg.core :as svg]
             [goog.string :as gstring]
             [goog.string.format]))
 
 ;; -------------------------
-;; State
-
-(defonce elems (atom {}))
-
-(defonce mouse-state (atom {:position [0 0]
-                            :left {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}
-                            :middle {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}
-                            :right {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}}))
-
-(defonce drag (atom nil))
-
-(defonce elem-type (atom :stmt))
-
-;; -------------------------
 ;; Views
 
-(defn arrow [from to]
-  [:g (svg/line-decorated from to nil (svg/arrow-head 10 (/ Math/PI 4) true))])
+(defn wrap-exact-event-target [f]
+  (fn [e]
+    (when (= (.-target e) (.-currentTarget e))
+      (f e))))
 
-(defn dragged? [id]
-  (reagent/track #(= @drag id)))
-
-(defn dragged! [id]
-  (reset! drag id))
-
-(defn right-pressed? []
-  (reagent/cursor mouse-state [:right :pressed?]))
-
-(defn internal-pos [id]
-  (reagent/cursor elems [id :pos]))
-
-(defn actual-pos [id]
-  (let [internal-pos (internal-pos id)
-        dragged? (dragged? id)
-        delta (reagent/cursor mouse-state [:middle :delta])]
-    (reagent/track #(map + @internal-pos (if @dragged?
-                                           @delta
-                                           [0 0])))))
-
-(defn outlinks [id]
-  (reagent/cursor elems [id :outlinks]))
-
-(defn link! [from to]
-  (swap! elems update-in [from :outlinks] conj to))
-
-(defn elem [type x y text]
-  {:id (keyword (gensym "id"))
-   :type type
-   :text text
-   :pos [x y]
-   :outlinks []})
-
-(defn add-elem! [{:keys [id] :as elem}]
-  (swap! elems assoc id elem))
-
-(defn map-vals [m f]
-  (->> m (map (fn [[k v]] [k (f v)])) (into {})))
-
-(defn remove-elem! [id]
-  (swap! elems
-         (fn [elems]
-           (-> elems
-               (dissoc id)
-               (map-vals #(update % :outlinks (partial remove #{id})))))))
-
-(defmulti render (fn [elem] (:type elem)))
-
-(defn draggable-component [id & body]
-  (vec (concat
-        [:g
-         (vec
-          (concat
-           [:g {:transform (apply gstring/format "translate(%d,%d)"
-                                  @(actual-pos id))
-                :on-mouse-down #(case (.-button %)
-                                  0 (swap! mouse-state update :left merge {:start-elem id})
-                                  1 (dragged! id))
-                :on-mouse-up #(case (.-button %)
-                                0 (when-let [from (get-in @mouse-state [:left :start-elem])]
-                                    (link! from id))
-                                1 (swap! elems assoc-in [id :pos] @(actual-pos id)))
-                :on-mouse-over #(if @(right-pressed?) (remove-elem! id))}]
-           body))]
-        (mapv (fn [dest] (arrow @(actual-pos id) @(actual-pos dest))) @(outlinks id)))))
-
-(defn edit-text [[x y] text]
-  (let [t (atom text)
-        editing? (atom false)]
-    (fn []
-      [:g {:transform (gstring/format "translate(%d,%d)" x y)}
-       (if @editing?
-         [:foreignObject {:width "100" :height "20"}
-          [:textarea {:style {:width "100%"
-                              :height "100%"}
-                      :auto-focus true
-                      :value @t
-                      :on-key-down (fn [e]
-                                     (when (= 27 (.-keyCode e)) ; ESC
-                                       (.blur (.-target e))))
-                      :on-change (fn [e]
-                                   (.preventDefault e)
-                                   (reset! t (.-value (.-target e))))
-                      :on-blur #(reset! editing? false)}]]
-         [svg/text [10 20] @t {:on-click #(do (.stopPropagation %)
-                                              (reset! editing? true))}])])))
-
-
-(defmethod render :start [{:keys [id text]}]
-  (let [w 60
-        h 20]
-    (draggable-component
-     id
-     [:ellipse {:cx w :cy h :rx w :ry h :style {:fill "plum"}}]
-     [edit-text [10 10] text])))
-
-(defmethod render :stmt [{:keys [id text]}]
-  (let [w 120
-        h 40]
-    (draggable-component
-     id
-     (svg/rect [0 0] w h {:style {:fill "blue"}})
-     [edit-text [5 5] text])))
-
-(defmethod render :branch [{:keys [id text]}]
-  (let [w 140
-        h 60
-        w' (/ w 2)
-        h' (/ h 2)]
-    (draggable-component
-     id
-     (svg/polygon [[0 h'] [w' 0] [w h'] [w' h]] {:style {:fill "orange"}})
-     [edit-text [40 40] text])))
-
-(defmethod render :note [{:keys [id text]}]
-  (let [corner 20
-        w 140
-        h 200]
-    (draggable-component
-     id
-     (svg/polygon [[corner 0] [w 0] [w h] [0 h] [0 corner]]
-                  {:style {:fill "beige"}})
-     (svg/polygon [[corner 0] [corner corner] [0 corner]]
-                  {:style {:fill "burlywood"}})
-     [edit-text [(* 1.2 corner) (* 1.2 corner)] text])))
-
-(defn- button-down! [button x y]
-  (swap! mouse-state update button merge {:pressed? true :dragstart [x y]}))
-
-(defn update-delta [x' y' s k]
-  (let [[x y] (get-in s [k :dragstart])]
-    (assoc-in s [k :delta] [(- x' x) (- y' y)])))
-
-(defn- update-drag [state x y]
-  (let [pressed-keys (keys (filter (fn [[button {:keys [pressed?]}]] pressed?)
-                                   state))]
-    (reduce (partial update-delta x y) state pressed-keys)))
-
-(defn- mouse-move! [x y]
-  (swap! mouse-state (fn [state]
-                       (-> state
-                           (update-drag x y)
-                           (assoc :position [x y])))))
-
-(defn- button-up! [button]
-  (do (swap! mouse-state update button merge {:pressed? false :delta [0 0] :start-elem nil})
-      (reset! drag nil)))
+(defn wrap-stop-propagation [f]
+  (fn [e]
+    (.stopPropagation e)
+    (f e)))
 
 (defn svg-component
   [& body]
@@ -184,14 +31,14 @@
             :stroke "black"}
     :on-click (fn [e] (do (.preventDefault e)
                           (when (= 0 (.-button e))
-                            (add-elem! (elem @elem-type (.-clientX e) (.-clientY e) "foo")))))
+                            (state/add-elem! (.-clientX e) (.-clientY e)))))
     :on-mouse-down (fn [e]
                      (let [x (.-clientX e)
                            y (.-clientY e)]
                        (when-not (and (= "TEXTAREA" (.-tagName (.-target e)))
                                       (= 0 (.-button e)))
                          (.preventDefault e)
-                         (button-down! (case (.-button e)
+                         (state/button-down! (case (.-button e)
                                          0 :left
                                          1 :middle
                                          2 :right) x y))
@@ -199,33 +46,20 @@
     :on-mouse-move (fn [e]
                      (let [x (.-clientX e)
                            y (.-clientY e)]
-                       (mouse-move! x y)))
+                       (state/mouse-move! x y)))
     :on-mouse-up (fn [e]
-                   (button-up! (case (.-button e)
+                   (state/button-up! (case (.-button e)
                                  0 :left
                                  1 :middle
                                  2 :right)))}
    body))
 
-(defn handle-key-press! [key-code]
-  (when-let [new-elem-type (case key-code
-                             66 :branch ;(b)ranch
-                             83 :stmt ;(s)tatement
-                             78 :note ;(n)ote
-                             84 :start ;(t)erminal
-                             nil)]
-    (reset! elem-type new-elem-type)))
-
 (defn svg-page []
   [svg-component
-   [svg/text [50 50] (with-out-str (pprint @mouse-state))]
-   [svg/text (map + [5 5] (get @mouse-state :position)) (name @elem-type)]
-   (when-let [start (get-in @mouse-state [:left :start-elem])]
-     (let [from @(actual-pos start)
-           to (get @mouse-state :position)]
-       [arrow from to]))
-   (for [elem (vals @elems)]
-     [render elem])])
+   [svg/text [50 50] (with-out-str (pprint @state/mouse-state))]
+   [view/mouse-label]
+   [view/mouse-arrow]
+   [view/elems]])
 
 ;; -------------------------
 ;; Initialize app
@@ -234,5 +68,5 @@
   (reagent/render [#'svg-page] (.getElementById js/document "app")))
 
 (defn init! []
-  (set! (.-onkeydown js/window) (fn [e] (handle-key-press! (.-keyCode e))))
+  (set! (.-onkeydown js/window) (fn [e] (state/handle-key-press! (.-keyCode e))))
   (mount-root))
