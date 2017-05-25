@@ -8,19 +8,17 @@
   [:g (svg/line-decorated from to nil (svg/arrow-head 10 (/ Math/PI 4) true))])
 
 (defn draggable-component [id & body]
-  (let [position (state/actual-pos id)]
-    (fn [id & body]
-      (into
-       [:g {:transform (apply gstring/format "translate(%d,%d)"
-                              @position)
-            :on-mouse-down #(case (.-button %)
-                              0 (state/link-start! id)
-                              1 (state/drag-start! id))
-            :on-mouse-up #(case (.-button %)
-                            0 (state/link-end! id)
-                            1 (state/drag-end! id))
-            :on-mouse-over #(if @(state/right-pressed?) (state/remove-elem! id))}]
-       body))))
+  (into
+   [:g {:transform (apply gstring/format "translate(%d,%d)"
+                          @(state/actual-pos id))
+        :on-mouse-down #(case (.-button %)
+                          0 (state/link-start! id)
+                          1 (state/drag-start! id))
+        :on-mouse-up #(case (.-button %)
+                        0 (state/link-end! id)
+                        1 (state/drag-end! id))
+        :on-mouse-over #(if @(state/right-pressed?) (state/remove-elem! id))}]
+   body))
 
 (defn outlinks [id]
   (let [start (state/actual-pos id)
