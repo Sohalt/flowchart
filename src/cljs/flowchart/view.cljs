@@ -1,10 +1,8 @@
 (ns flowchart.view
   (:require [flowchart.elems :as elems]
+            [flowchart.common :as common]
             [flowchart.state :as state]
             [thi.ng.geom.svg.core :as svg]))
-
-(defn arrow [from to]
-  [:g (svg/line-decorated from to nil (svg/arrow-head 10 (/ Math/PI 4) true))])
 
 (defn mouse-label []
   (let [cursor-position (state/cursor-position)
@@ -17,7 +15,7 @@
         cursor-position (state/cursor-position)]
     (fn []
       (if-let [start @start-elem]
-        [arrow @(state/actual-pos start) @cursor-position]))))
+        [common/arrow @(state/actual-pos start) @cursor-position]))))
 
 (defn elems []
   (let [elems (state/elems)]

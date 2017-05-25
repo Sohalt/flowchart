@@ -1,9 +1,11 @@
 (ns flowchart.common
   (:require [flowchart.state :as state]
-            [flowchart.view :as view]
             [thi.ng.geom.svg.core :as svg]
             [reagent.core :as reagent :refer [atom]]
             [goog.string :as gstring]))
+
+(defn arrow [from to]
+  [:g (svg/line-decorated from to nil (svg/arrow-head 10 (/ Math/PI 4) true))])
 
 (defn draggable-component [id & body]
   (let [position (state/actual-pos id)]
@@ -24,7 +26,7 @@
   (let [start (state/actual-pos id)
         outlinks (state/outlinks id)]
     (fn [id]
-      (into [:g] (mapv (fn [dest] [view/arrow @start @(state/actual-pos dest)]) @outlinks)))))
+      (into [:g] (mapv (fn [dest] [arrow @start @(state/actual-pos dest)]) @outlinks)))))
 
 (defn edit-text [[x y] text]
   (let [t (atom text)
