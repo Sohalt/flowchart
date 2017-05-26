@@ -5,7 +5,8 @@
             [cljs.pprint :refer [pprint]]
             [thi.ng.geom.svg.core :as svg]
             [goog.string :as gstring]
-            [goog.string.format]))
+            [goog.string.format]
+            [pie]))
 
 ;; -------------------------
 ;; Views
@@ -70,5 +71,8 @@
   (reagent/render [#'svg-page] (.getElementById js/document "app")))
 
 (defn init! []
-  (set! (.-onkeydown js/window) (fn [e] (state/handle-key-press! (.-keyCode e))))
-  (mount-root))
+  (let [p (js/pie (clj->js [{:label "foo" :trigger #(js/alert "foo")} {:label "bar" :trigger #(js/alert "bar")} {:label "baz" :trigger #(js/alert "baz")}]))
+        app (.getElementById js/document "app")]
+    (.appendChild app p))
+  #_(set! (.-onkeydown js/window) (fn [e] (state/handle-key-press! (.-keyCode e))))
+  #_(mount-root))

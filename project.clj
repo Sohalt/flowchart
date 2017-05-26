@@ -45,20 +45,26 @@
 
   :cljsbuild
   {:builds {:min
-            {:source-paths ["src/cljs" "src/cljc" "env/prod/cljs"]
+            {:source-paths ["src/cljs" "src/cljc" "env/prod/cljs" "src/js"]
              :compiler
              {:output-to "target/cljsbuild/public/js/app.js"
               :output-dir "target/uberjar"
               :optimizations :advanced
+              :externs ["js/piemenu-externs.js"]
+              :foreign-libs [{:file "src/js/piemenu.js"
+                              :provides ["pie"]}]
               :pretty-print  false}}
             :app
-            {:source-paths ["src/cljs" "src/cljc" "env/dev/cljs"]
+            {:source-paths ["src/cljs" "src/cljc" "env/dev/cljs" "src/js"]
              :compiler
              {:main "flowchart.dev"
               :asset-path "/js/out"
               :output-to "target/cljsbuild/public/js/app.js"
               :output-dir "target/cljsbuild/public/js/out"
               :source-map true
+              :externs ["js/piemenu-externs.js"]
+              :foreign-libs [{:file "src/js/piemenu.js"
+                              :provides ["pie"]}]
               :optimizations :none
               :pretty-print  true}}
 
