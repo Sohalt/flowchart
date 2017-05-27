@@ -40,7 +40,7 @@
                                          0 :left
                                          1 :middle
                                          2 :right) x y)
-                         (f e))
+                         (when (= 0 (.-button e)) (f e)))
                        false))
     :on-mouse-move (fn [e]
                      (let [x (.-clientX e)
