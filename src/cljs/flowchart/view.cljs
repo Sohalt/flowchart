@@ -6,6 +6,7 @@
             [cljs.pprint :refer [pprint]]
             [reagent.core :as reagent :refer [atom]]
             [thi.ng.geom.svg.core :as svg]
+            [historian.core :as hist]
             [pie]
             [clojure.string :as str]))
 
@@ -67,6 +68,8 @@
     (fn []
       [:div {:style {:position :absolute
                      :bottom 0}}
+       [:button {:on-click #(hist/undo!)} "undo"]
+       [:button {:on-click #(hist/redo!)} "redo"]
        [:button {:on-click #(if-let [name (js/prompt "name:")]
                               (persistence/save! name))} "save"]
        [:select {:on-click (fn [e]

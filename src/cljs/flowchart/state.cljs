@@ -1,5 +1,6 @@
 (ns flowchart.state
-  (:require [reagent.core :as reagent :refer [atom]]))
+  (:require [reagent.core :as reagent :refer [atom]]
+            [historian.core :as hist]))
 
 ;; State
 
@@ -20,6 +21,8 @@
                      :position [0 0]}))
 
 (defonce ^:private drag (atom nil))
+
+(defonce _ (hist/record! elems' :elems))
 
 ;; Subscriptions
 

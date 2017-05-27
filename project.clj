@@ -15,6 +15,7 @@
                  [org.clojure/clojurescript "1.9.495"
                   :scope "provided"]
                  [thi.ng/geom "0.0.908"]
+                 [historian "1.1.1"]
                  #_[keechma "0.2.0-SNAPSHOT-11"]]
 
   :plugins [[lein-environ "1.0.2"]
