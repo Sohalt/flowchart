@@ -29,19 +29,23 @@
 (defn menu []
   (let [menu-position (state/menu-position)
         visible (state/menu-visible)]
-    (reagent/create-class
-     {:reagent-render
-      (fn []
-        (let [[x y] @menu-position]
-          [:div {:style {:position "absolute"
-                         :left (- x 50)
-                         :top (- y 50)
-                         :display (if @visible "block" "none")}}]))
-      :component-did-mount
-      (fn [this]
-        (let [node (reagent/dom-node this)
-              menu (js/pie (clj->js [{:label "stmt"   :class "stmt"   :trigger #(do (state/hide-menu!) (state/add-elem! :stmt))}
-                                     {:label "branch" :class "branch" :trigger #(do (state/hide-menu!) (state/add-elem! :branch))}
-                                     {:label "term"   :class "term"   :trigger #(do (state/hide-menu!) (state/add-elem! :term))}
-                                     {:label "note"   :class "note"   :trigger #(do (state/hide-menu!) (state/add-elem! :note))}]))]
-          (.appendChild node menu)))})))
+    (let [radius 100
+          inner-radius 20]
+      (reagent/create-class
+       {:reagent-render
+        (fn []
+          (let [[x y] @menu-position]
+            [:div {:style {:position "absolute"
+                           :left (- x radius)
+                           :top (- y radius)
+                           :display (if @visible "block" "none")}}]))
+        :component-did-mount
+        (fn [this]
+          (let [node (reagent/dom-node this)
+                menu (js/pie (clj->js [{:label "stmt"   :class "stmt"   :trigger #(do (state/hide-menu!) (state/add-elem! :stmt))}
+                                       {:label "branch" :class "branch" :trigger #(do (state/hide-menu!) (state/add-elem! :branch))}
+                                       {:label "term"   :class "term"   :trigger #(do (state/hide-menu!) (state/add-elem! :term))}
+                                       {:label "note"   :class "note"   :trigger #(do (state/hide-menu!) (state/add-elem! :note))}])
+                             (clj->js {:innerRadius inner-radius
+                                       :radius radius}))]
+            (.appendChild node menu)))}))))
