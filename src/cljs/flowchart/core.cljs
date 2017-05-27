@@ -61,7 +61,7 @@
    [view/elems]])
 
 (defn app-page []
-  [:div
+  [:div {:on-mouse-up #(state/hide-menu!)}
    [svg-page]
    [view/menu]
    [view/controls]])
