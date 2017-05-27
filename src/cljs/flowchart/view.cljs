@@ -82,4 +82,4 @@
                               (reset! save (.-value (.-target e))))}
         (for [save @saves]
           [:option save])]
-       [:button {:on-click #(do (.log js/console @save) (persistence/load! @save))} "load"]])))
+       [:button {:on-click #(do (hist/clear-history!) (persistence/load! @save))} "load"]])))
