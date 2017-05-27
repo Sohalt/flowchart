@@ -56,7 +56,6 @@
 (defn svg-page []
   [svg-component
    [svg/text [50 50] (with-out-str (pprint @state/mouse-state))]
-   #_[view/mouse-label]
    [view/mouse-arrow]
    [view/elems]])
 
@@ -73,5 +72,4 @@
   (reagent/render [#'app-page] (.getElementById js/document "app")))
 
 (defn init! []
-  #_(set! (.-onkeydown js/window) (fn [e] (state/handle-key-press! (.-keyCode e))))
   (mount-root))

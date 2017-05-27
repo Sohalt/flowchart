@@ -21,8 +21,6 @@
 
 (defonce ^:private drag (atom nil))
 
-(defonce ^:private elem-type' (atom :stmt))
-
 ;; Subscriptions
 
 (defn cursor-position []
@@ -39,9 +37,6 @@
 
 (defn elems []
   (reagent/track #(vals @elems')))
-
-(defn elem-type []
-  elem-type')
 
 (defn dragged? [id]
   (reagent/track #(= @drag id)))
@@ -136,14 +131,4 @@
   (swap! menu assoc :visible false))
 
 (defn- button-up! [button]
-  (do (swap! mouse-state update button merge {:pressed? false :delta [0 0] :start-elem nil})
-      (hide-menu!)))
-
-(defn handle-key-press! [key-code]
-  (when-let [new-elem-type (case key-code
-                             66 :branch ;(b)ranch
-                             83 :stmt ;(s)tatement
-                             78 :note ;(n)ote
-                             84 :start ;(t)erminal
-                             nil)]
-    (reset! elem-type' new-elem-type)))
+  (swap! mouse-state update button merge {:pressed? false :delta [0 0] :start-elem nil}))

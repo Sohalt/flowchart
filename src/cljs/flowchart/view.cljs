@@ -7,12 +7,6 @@
             [thi.ng.geom.svg.core :as svg]
             [pie]))
 
-(defn mouse-label []
-  (let [cursor-position (state/cursor-position)
-        elem-type (state/elem-type)]
-    (fn []
-      [svg/text (map + [5 5] @cursor-position) (name @elem-type)])))
-
 (defn mouse-arrow []
   (let [start-elem (state/start-elem)
         cursor-position (state/cursor-position)]

@@ -8,7 +8,7 @@
 (defn multiline-text [[x y] text & [attrs]]
   (into [:text (svg/svg-attribs attrs {:x x :y y})]
         (map-indexed (fn [i line]
-                       [:tspan {:x x :dy "1.2em" #_(str (+ y (* i 1.2)) "em")} line])
+                       [:tspan {:x x :dy "1.2em"} line])
                      (str/split-lines text))))
 
 (defn arrow [from to]
