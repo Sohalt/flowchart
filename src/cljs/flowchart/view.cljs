@@ -2,6 +2,7 @@
   (:require [flowchart.elems :as elems]
             [flowchart.common :as common]
             [flowchart.state :as state]
+            [flowchart.persistence :as persistence]
             [reagent.core :as reagent :refer [atom]]
             [thi.ng.geom.svg.core :as svg]
             [pie]))
@@ -49,3 +50,8 @@
                              (clj->js {:innerRadius inner-radius
                                        :radius radius}))]
             (.appendChild node menu)))}))))
+
+(defn controls []
+  [:div
+   [:button {:on-click #(persistence/save!)} "save"]
+   [:button {:on-click #(persistence/load!)} "load"]])

@@ -63,7 +63,8 @@
 (defn app-page []
   [:div
    [svg-page]
-   [view/menu]])
+   [view/menu]
+   [view/controls]])
 
 ;; -------------------------
 ;; Initialize app

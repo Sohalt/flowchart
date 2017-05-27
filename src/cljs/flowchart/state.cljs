@@ -5,12 +5,18 @@
 
 (defonce ^:private elems' (atom {}))
 
+(defn get-elems-state []
+  @elems')
+
+(defn set-elems-state! [state]
+  (reset! elems' state))
+
 (defonce mouse-state (atom {:position [0 0]
                             :left {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}
                             :middle {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}
                             :right {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}}))
 
-(defonce menu (atom {:visible false
+(defonce ^:private menu (atom {:visible false
                      :position [0 0]}))
 
 (defonce ^:private drag (atom nil))
