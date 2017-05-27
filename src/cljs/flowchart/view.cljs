@@ -60,10 +60,7 @@
             (.appendChild node menu)))}))))
 
 (defn controls []
-  (let [saves (atom (->> (.keys js/Object js/localStorage)
-                         (js->clj)
-                         (filter #(str/starts-with? % "flowchart-save:"))
-                         (map #(subs % 15))))]
+  (let [saves (atom [])]
     (fn []
       [:div {:style {:position :absolute
                      :bottom 0}}
@@ -78,10 +75,12 @@
                                           (filter #(str/starts-with? % "flowchart-save:"))
                                           (map #(subs % 15)))))
                  :on-change (fn [e]
-                              (let [selected (.-value (.-target e))]
+                              (let [select (.-target e)
+                                    selected (.-value select)]
                                 (when-not (= selected "load")
                                   (hist/clear-history!)
-                                  (persistence/load! selected))))}
+                                  (persistence/load! selected)
+                                  (set! (.-value select) "load"))))}
         [:option "load"]
         (for [save @saves]
           [:option save])]])))
