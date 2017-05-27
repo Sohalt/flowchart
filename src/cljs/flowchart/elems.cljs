@@ -4,7 +4,7 @@
 
 (defmulti render (fn [elem] (:type elem)))
 
-(defmethod render :start [{:keys [id text]}]
+(defmethod render :term [{:keys [id text]}]
   (let [w 60
         h 20]
     [:g

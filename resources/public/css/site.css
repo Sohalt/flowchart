@@ -3,3 +3,16 @@
   margin: 0 auto;
   -webkit-font-smoothing: antialiased;
 }
+
+path.stmt {
+    fill: blue;
+}
+path.branch {
+    fill: orange;
+}
+path.note {
+    fill: beige;
+}
+path.term {
+    fill: plum;
+}

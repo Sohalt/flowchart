@@ -2,7 +2,9 @@
   (:require [flowchart.elems :as elems]
             [flowchart.common :as common]
             [flowchart.state :as state]
-            [thi.ng.geom.svg.core :as svg]))
+            [reagent.core :as reagent :refer [atom]]
+            [thi.ng.geom.svg.core :as svg]
+            [pie]))
 
 (defn mouse-label []
   (let [cursor-position (state/cursor-position)
@@ -23,3 +25,23 @@
       [:g
        (for [elem @elems]
          [elems/render elem])])))
+
+(defn menu []
+  (let [menu-position (state/menu-position)
+        visible (state/menu-visible)]
+    (reagent/create-class
+     {:reagent-render
+      (fn []
+        (let [[x y] @menu-position]
+          [:div {:style {:position "absolute"
+                         :left (- x 50)
+                         :top (- y 50)
+                         :display (if @visible "block" "none")}}]))
+      :component-did-mount
+      (fn [this]
+        (let [node (reagent/dom-node this)
+              menu (js/pie (clj->js [{:label "stmt"   :class "stmt"   :trigger #(do (state/hide-menu!) (state/add-elem! :stmt))}
+                                     {:label "branch" :class "branch" :trigger #(do (state/hide-menu!) (state/add-elem! :branch))}
+                                     {:label "term"   :class "term"   :trigger #(do (state/hide-menu!) (state/add-elem! :term))}
+                                     {:label "note"   :class "note"   :trigger #(do (state/hide-menu!) (state/add-elem! :note))}]))]
+          (.appendChild node menu)))})))

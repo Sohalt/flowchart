@@ -5,8 +5,7 @@
             [cljs.pprint :refer [pprint]]
             [thi.ng.geom.svg.core :as svg]
             [goog.string :as gstring]
-            [goog.string.format]
-            [pie]))
+            [goog.string.format]))
 
 ;; -------------------------
 ;; Views
@@ -30,21 +29,18 @@
     :style {:background-color "#fff"
             :display "block"
             :stroke "black"}
-    :on-click (-> (fn [e] (do (.preventDefault e)
-                              (when (= 0 (.-button e))
-                                (state/add-elem! (.-clientX e) (.-clientY e)))))
-                  (wrap-exact-event-target)
-                  (wrap-stop-propagation))
     :on-mouse-down (fn [e]
                      (let [x (.-clientX e)
-                           y (.-clientY e)]
+                           y (.-clientY e)
+                           f (wrap-exact-event-target #(state/show-menu!))]
                        (when-not (and (= "TEXTAREA" (.-tagName (.-target e)))
                                       (= 0 (.-button e)))
                          (.preventDefault e)
                          (state/button-down! (case (.-button e)
                                          0 :left
                                          1 :middle
-                                         2 :right) x y))
+                                         2 :right) x y)
+                         (f e))
                        false))
     :on-mouse-move (fn [e]
                      (let [x (.-clientX e)
@@ -60,19 +56,21 @@
 (defn svg-page []
   [svg-component
    [svg/text [50 50] (with-out-str (pprint @state/mouse-state))]
-   [view/mouse-label]
+   #_[view/mouse-label]
    [view/mouse-arrow]
    [view/elems]])
+
+(defn app-page []
+  [:div
+   [svg-page]
+   [view/menu]])
 
 ;; -------------------------
 ;; Initialize app
 
 (defn mount-root []
-  (reagent/render [#'svg-page] (.getElementById js/document "app")))
+  (reagent/render [#'app-page] (.getElementById js/document "app")))
 
 (defn init! []
-  (let [p (js/pie (clj->js [{:label "foo" :trigger #(js/alert "foo")} {:label "bar" :trigger #(js/alert "bar")} {:label "baz" :trigger #(js/alert "baz")}]))
-        app (.getElementById js/document "app")]
-    (.appendChild app p))
   #_(set! (.-onkeydown js/window) (fn [e] (state/handle-key-press! (.-keyCode e))))
-  #_(mount-root))
+  (mount-root))

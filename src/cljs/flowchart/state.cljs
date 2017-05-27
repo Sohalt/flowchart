@@ -10,6 +10,9 @@
                             :middle {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}
                             :right {:pressed? false :dragstart [0 0] :delta [0 0] :start-elem nil}}))
 
+(defonce menu (atom {:visible false
+                     :position [0 0]}))
+
 (defonce ^:private drag (atom nil))
 
 (defonce ^:private elem-type' (atom :stmt))
@@ -18,6 +21,12 @@
 
 (defn cursor-position []
   (reagent/cursor mouse-state [:position]))
+
+(defn menu-position []
+  (reagent/cursor menu [:position]))
+
+(defn menu-visible []
+  (reagent/cursor menu [:visible]))
 
 (defn start-elem []
   (reagent/cursor mouse-state [:left :start-elem]))
@@ -54,7 +63,8 @@
   (reset! drag id))
 
 (defn drag-end! [id]
-  (swap! elems' assoc-in [id :pos] @(actual-pos id)))
+  (swap! elems' assoc-in [id :pos] @(actual-pos id))
+  (reset! drag nil))
 
 (defn link! [from to]
   (swap! elems' update-in [from :outlinks] conj to))
@@ -73,8 +83,9 @@
    :pos [x y]
    :outlinks []})
 
-(defn add-elem! [x y]
-  (let [{:keys [id] :as e} (elem @(elem-type) x y)]
+(defn add-elem! [type]
+  (let [[x y] @(cursor-position)
+        {:keys [id] :as e} (elem type x y)]
     (swap! elems' assoc id e)))
 
 (defn- map-vals [m f]
@@ -105,9 +116,19 @@
                            (update-drag x y)
                            (assoc :position [x y])))))
 
+(defn show-menu! []
+  (swap! menu
+         (fn [m]
+           (-> m
+               (assoc :position @(cursor-position))
+               (assoc :visible true)))))
+
+(defn hide-menu! []
+  (swap! menu assoc :visible false))
+
 (defn- button-up! [button]
   (do (swap! mouse-state update button merge {:pressed? false :delta [0 0] :start-elem nil})
-      (reset! drag nil)))
+      (hide-menu!)))
 
 (defn handle-key-press! [key-code]
   (when-let [new-elem-type (case key-code
