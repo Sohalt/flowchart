@@ -59,6 +59,24 @@
             (.appendChild node menu)))}))))
 
 (defn controls []
-  [:div
-   [:button {:on-click #(persistence/save!)} "save"]
-   [:button {:on-click #(persistence/load!)} "load"]])
+  (let [save (atom nil)
+        saves (atom (->> (.keys js/Object js/localStorage)
+                         (js->clj)
+                         (filter #(str/starts-with? % "flowchart-save:"))
+                         (map #(subs % 15))))]
+    (fn []
+      [:div {:style {:position :absolute
+                     :bottom 0}}
+       [:button {:on-click #(if-let [name (js/prompt "name:")]
+                              (persistence/save! name))} "save"]
+       [:select {:on-click (fn [e]
+                             (reset! saves
+                                     (->> (.keys js/Object js/localStorage)
+                                         (js->clj)
+                                         (filter #(str/starts-with? % "flowchart-save:"))
+                                         (map #(subs % 15)))))
+                 :on-change (fn [e]
+                              (reset! save (.-value (.-target e))))}
+        (for [save @saves]
+          [:option save])]
+       [:button {:on-click #(do (.log js/console @save) (persistence/load! @save))} "load"]])))
