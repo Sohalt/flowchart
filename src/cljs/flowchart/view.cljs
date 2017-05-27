@@ -63,8 +63,7 @@
   (let [saves (atom (->> (.keys js/Object js/localStorage)
                          (js->clj)
                          (filter #(str/starts-with? % "flowchart-save:"))
-                         (map #(subs % 15))))
-        save (atom (first @saves))]
+                         (map #(subs % 15))))]
     (fn []
       [:div {:style {:position :absolute
                      :bottom 0}}
@@ -79,7 +78,10 @@
                                           (filter #(str/starts-with? % "flowchart-save:"))
                                           (map #(subs % 15)))))
                  :on-change (fn [e]
-                              (reset! save (.-value (.-target e))))}
+                              (let [selected (.-value (.-target e))]
+                                (when-not (= selected "load")
+                                  (hist/clear-history!)
+                                  (persistence/load! selected))))}
+        [:option "load"]
         (for [save @saves]
-          [:option save])]
-       [:button {:on-click #(do (hist/clear-history!) (persistence/load! @save))} "load"]])))
+          [:option save])]])))
