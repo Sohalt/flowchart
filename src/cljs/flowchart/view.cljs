@@ -60,11 +60,11 @@
             (.appendChild node menu)))}))))
 
 (defn controls []
-  (let [save (atom nil)
-        saves (atom (->> (.keys js/Object js/localStorage)
+  (let [saves (atom (->> (.keys js/Object js/localStorage)
                          (js->clj)
                          (filter #(str/starts-with? % "flowchart-save:"))
-                         (map #(subs % 15))))]
+                         (map #(subs % 15))))
+        save (atom (first @saves))]
     (fn []
       [:div {:style {:position :absolute
                      :bottom 0}}
