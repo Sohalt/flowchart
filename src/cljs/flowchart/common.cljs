@@ -33,8 +33,8 @@
     (fn [id]
       (into [:g] (mapv (fn [dest] [arrow @start @(state/actual-pos dest)]) @outlinks)))))
 
-(defn edit-text [[x y] text]
-  (let [t (atom text)
+(defn edit-text [[x y] text-cursor]
+  (let [t (atom @text-cursor)
         editing? (atom false)]
     (fn []
       [:g {:transform (gstring/format "translate(%d,%d)" x y)}
@@ -50,6 +50,6 @@
                       :on-change (fn [e]
                                    (.preventDefault e)
                                    (reset! t (.-value (.-target e))))
-                      :on-blur #(reset! editing? false)}]]
+                      :on-blur #(do (reset! text-cursor @t) (reset! editing? false))}]]
          [multiline-text [10 20] @t {:on-click #(do (.stopPropagation %)
                                               (reset! editing? true))}])])))

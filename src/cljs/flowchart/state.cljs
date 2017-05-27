@@ -57,6 +57,9 @@
 (defn outlinks [id]
   (reagent/cursor elems' [id :outlinks]))
 
+(defn text [id]
+  (reagent/cursor elems' [id :text]))
+
 ;; Mutations
 
 (defn drag-start! [id]
