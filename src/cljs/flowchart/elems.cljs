@@ -12,7 +12,7 @@
      [common/draggable-component
       id
       [:ellipse {:cx w :cy h :rx w :ry h :style {:fill "plum"}}]
-      [common/edit-text [10 10] (state/text id)]]
+      [common/edit-text [0 -10] (state/text id)]]
      [common/outlinks id]]))
 
 (defmethod render :stmt [{:keys [id text]}]
@@ -22,7 +22,7 @@
      [common/draggable-component
       id
       (svg/rect [0 0] w h {:style {:fill "blue"}})
-      [common/edit-text [0 0] (state/text id)]]
+      [common/edit-text [0 -10] (state/text id)]]
      [common/outlinks id]]))
 
 (defmethod render :branch [{:keys [id text]}]
@@ -34,7 +34,7 @@
      [common/draggable-component
       id
       (svg/polygon [[0 h'] [w' 0] [w h'] [w' h]] {:style {:fill "orange"}})
-      [common/edit-text [40 40] (state/text id)]]
+      [common/edit-text [30 0] (state/text id)]]
      [common/outlinks id]]))
 
 (defmethod render :note [{:keys [id text]}]
@@ -48,5 +48,5 @@
                    {:style {:fill "beige"}})
       (svg/polygon [[corner 0] [corner corner] [0 corner]]
                    {:style {:fill "burlywood"}})
-      [common/edit-text [(* 1.2 corner) (* 1.2 corner)] (state/text id)]]]))
+      [common/edit-text [0 0] (state/text id)]]]))
 
