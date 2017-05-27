@@ -75,9 +75,9 @@
        [:select {:on-click (fn [e]
                              (reset! saves
                                      (->> (.keys js/Object js/localStorage)
-                                         (js->clj)
-                                         (filter #(str/starts-with? % "flowchart-save:"))
-                                         (map #(subs % 15)))))
+                                          (js->clj)
+                                          (filter #(str/starts-with? % "flowchart-save:"))
+                                          (map #(subs % 15)))))
                  :on-change (fn [e]
                               (reset! save (.-value (.-target e))))}
         (for [save @saves]
