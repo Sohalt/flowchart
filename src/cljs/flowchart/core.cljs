@@ -2,7 +2,6 @@
   (:require [flowchart.state :as state]
             [flowchart.view :as view]
             [reagent.core :as reagent :refer [atom]]
-            [cljs.pprint :refer [pprint]]
             [thi.ng.geom.svg.core :as svg]
             [goog.string :as gstring]
             [goog.string.format]))
@@ -55,12 +54,12 @@
 
 (defn svg-page []
   [svg-component
-   [svg/text [50 50] (with-out-str (pprint @state/mouse-state))]
    [view/mouse-arrow]
    [view/elems]])
 
 (defn app-page []
   [:div {:on-mouse-up #(state/hide-menu!)}
+   [view/debug]
    [svg-page]
    [view/menu]
    [view/controls]])

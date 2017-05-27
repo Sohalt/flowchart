@@ -3,9 +3,22 @@
             [flowchart.common :as common]
             [flowchart.state :as state]
             [flowchart.persistence :as persistence]
+            [cljs.pprint :refer [pprint]]
             [reagent.core :as reagent :refer [atom]]
             [thi.ng.geom.svg.core :as svg]
-            [pie]))
+            [pie]
+            [clojure.string :as str]))
+
+(defn debug []
+  [:div {:style {:position :absolute
+                 :top 0
+                 :left 0
+                 :right 0
+                 :color "white"
+                 :background-color "#00000055"}}
+   [:pre
+    (with-out-str (pprint @state/mouse-state))
+    (with-out-str (pprint @state/elems'))]])
 
 (defn mouse-arrow []
   (let [start-elem (state/start-elem)
