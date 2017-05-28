@@ -22,6 +22,8 @@
 
 (defonce ^:private drag (atom nil))
 
+(defonce debug (atom false))
+
 (defonce _ (hist/record! elems' :elems))
 
 ;; Subscriptions

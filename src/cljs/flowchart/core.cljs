@@ -1,6 +1,7 @@
 (ns flowchart.core
   (:require [flowchart.state :as state]
             [flowchart.view :as view]
+            [flowchart.events :as events]
             [reagent.core :as reagent :refer [atom]]
             [thi.ng.geom.svg.core :as svg]
             [goog.string :as gstring]
@@ -71,4 +72,5 @@
   (reagent/render [#'app-page] (.getElementById js/document "app")))
 
 (defn init! []
-  (mount-root))
+  (mount-root)
+  (events/bind-keys))
