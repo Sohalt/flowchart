@@ -51,5 +51,6 @@
                                    (.preventDefault e)
                                    (reset! t (.-value (.-target e))))
                       :on-blur #(do (reset! text-cursor @t) (reset! editing? false))}]]
-         [multiline-text [10 20] @t {:on-click #(do (.stopPropagation %)
-                                              (reset! editing? true))}])])))
+         [multiline-text [10 20] @t {:on-click #(when (= 0 (.-button %))
+                                                  (.stopPropagation %)
+                                                  (reset! editing? true))}])])))
