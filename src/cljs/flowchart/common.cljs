@@ -3,6 +3,7 @@
             [thi.ng.geom.svg.core :as svg]
             [reagent.core :as reagent :refer [atom]]
             [goog.string :as gstring]
+            [goog.string.format]
             [clojure.string :as str]))
 
 (defn multiline-text [[x y] text & [attrs]]

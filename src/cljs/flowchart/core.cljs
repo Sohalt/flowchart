@@ -2,13 +2,8 @@
   (:require [flowchart.state :as state]
             [flowchart.view :as view]
             [flowchart.events :as events]
-            [reagent.core :as reagent :refer [atom]]
-            [thi.ng.geom.svg.core :as svg]
-            [goog.string :as gstring]
-            [goog.string.format]))
-
-;; -------------------------
-;; Views
+            [reagent.core :as reagent]
+            [thi.ng.geom.svg.core :as svg]))
 
 (defn wrap-exact-event-target [f]
   (fn [e]
