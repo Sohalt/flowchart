@@ -6,12 +6,6 @@
             [goog.string.format]
             [clojure.string :as str]))
 
-(defn multiline-text [[x y] text & [attrs]]
-  (into [:text (svg/svg-attribs attrs {:x x :y y})]
-        (map-indexed (fn [i line]
-                       [:tspan {:x x :dy "1.2em"} line])
-                     (str/split-lines text))))
-
 (defn arrow [from to]
   [:g (svg/line-decorated from to nil (svg/arrow-head 10 (/ Math/PI 4) true))])
 
@@ -34,7 +28,7 @@
     (fn [id]
       (into [:g] (mapv (fn [dest] [arrow @start @(state/actual-pos dest)]) @outlinks)))))
 
-(defn edit-text [[x y] text-cursor]
+(defn edit-text [[x y] w h text-cursor]
   (let [t (atom @text-cursor)
         editing? (atom false)]
     (fn []
@@ -52,6 +46,10 @@
                                    (.preventDefault e)
                                    (reset! t (.-value (.-target e))))
                       :on-blur #(do (reset! text-cursor @t) (reset! editing? false))}]]
-         [multiline-text [10 20] @t {:on-click #(when (= 0 (.-button %))
-                                                  (.stopPropagation %)
-                                                  (reset! editing? true))}])])))
+         (into [:foreignObject {:width (str w) :height (str h)
+                                :required-features "http://www.w3.org/TR/SVG11/feature#Extensibility"
+                                :on-click #(when (= 0 (.-button %))
+                                             (.stopPropagation %)
+                                             (reset! editing? true))}]
+               (map (fn [l] [:p {:style {:margin 0
+                                         :word-wrap "break-word"}}l]) (str/split-lines @t))))])))
