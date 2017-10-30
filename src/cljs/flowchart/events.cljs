@@ -7,7 +7,8 @@
 
 (defn bind-ctrl-space []
   (events/listen js/window EventType.KEYDOWN
-                 #(when (= (.-keyCode %) 68) ;d
+                 #(when (and (.-ctrlKey %) (= (.-keyCode %) 32)) ;CTRL+SPACE
+                    (.preventDefault %)
                     (swap! state/debug not))))
 
 (defn bind-keys []
