@@ -1,10 +1,12 @@
 # flowchart
 
-A Clojure library designed to ... well, that part is up to you.
+A SVG based flowchart editor in the browser, optimized for use with a stylus.
 
 ## Usage
 
-FIXME
+*WIP* not ready for use!
+
+These are some interaction ideas --- some implemented, some not (yet):
 
 Stylus:
 (left)click -> pie menu w/ selection: start,end, stmt, branch
@@ -52,7 +54,6 @@ t branch
 
 ## License
 
-Copyright © 2017 FIXME
+Copyright © 2018 sohalt
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the MIT License.
