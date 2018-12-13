@@ -8,6 +8,7 @@ A SVG based flowchart editor in the browser, optimized for use with a stylus.
 
 These are some interaction ideas --- some implemented, some not (yet):
 
+```
 Stylus:
 (left)click -> pie menu w/ selection: start,end, stmt, branch
 (left)click on existing bubble -> focus text label
@@ -51,6 +52,7 @@ w start
 e end
 r stmt
 t branch
+```
 
 ## License
 
